@@ -22,17 +22,20 @@ root.geometry("400x600")
 root.resizable(False, False)
 root.configure(bg="#232323")
 
+# Место для хранения формулы
+label = tk.Label(root, text="test", font=("Arial", 24), bg="#232323", fg="#535353", bd=0, justify="right", anchor="e")
+label.grid(row=0, column=0, columnspan=5, padx=10, pady=(10, 0), sticky="ew")
 # Поле ввода
 entry = tk.Entry(root, font=("Arial", 24), bg="#232323", fg="white", bd=0, justify="right")
-entry.grid(row=0, column=0, columnspan=4, padx=10, pady=20, sticky="nsew")
+entry.grid(row=1, column=0, columnspan=5, padx=10, pady=(0, 10), sticky="ew")
 
 buttons = [
-"(", ")", "чето", "чето",
-"sqrt", "x²", "C", "/",
-"7", "8", "9", "×",
-"4", "5", "6", "-",
-"1", "2", "3", "+",
-"0", ".", "=",
+    "sin", "cos", "tg", "ctg", "rad",
+    "(", ")", "x²", "C", "/",
+    "sqrt", "7", "8", "9", "×",
+    "x^y", "4", "5", "6", "-",
+    "log", "1", "2", "3", "+",
+    "ln", "+/-", "0", ".", "="
 ]
 
 # Описание функций (символы и мат.операции) и их приоритетов
@@ -107,28 +110,33 @@ def polish_notation(expression):
     
     
     
-
+# Создание кнопки
 def create_button(text):
-    return tk.Button(
-        root, text=text, font=("Arial", 18), fg="white", bg="#3b3b3b",
-        width=5, height=2, bd=0, activebackground="#555555", activeforeground="white"
-    )
+    btn = tk.Button(
+        root, text=text, font=("Arial", 14), fg="white", width=5, height=2, bd=0, activebackground="#555555", 
+        activeforeground="white"
+    )    
+    if text == "=":
+        btn.configure(bg="#678afc", activebackground="#80B9FF")
+    else:
+        btn.configure(bg="#3b3b3b")
+    return btn
 
-row = 1
+row = 2
 col = 0
 
 for button in buttons:
     btn = create_button(button)
-    btn.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
+    btn.grid(row=row, column=col, padx=2, pady=2, sticky="nsew")
     btn.bind("<Button-1>", on_click)
     col += 1
-    if col > 3:
+    if col > 4:
         col = 0
         row += 1
 
-for i in range(4):
+for i in range(7):
     root.grid_columnconfigure(i, weight=1)
-for i in range(5):
+for i in range(8):
     root.grid_rowconfigure(i, weight=1)
 
 root.mainloop()
