@@ -1,17 +1,32 @@
 import tkinter as tk
 from tkinter import messagebox
 
+# Ивенты, происходящие при нажатии на кнопки
 def on_click(event):
     text = event.widget.cget("text")
     if text == "=":
         try:
+            label.configure(text=entry.get()+"=")
             result = polish_notation(entry.get().replace("×","*"))
             entry.delete(0, tk.END)
             entry.insert(tk.END, str(result))
         except Exception as e:
             messagebox.showerror("Ошибка", "Неверное выражение")
+    elif text in wrapping_operators:
+        entry.insert(0, text+"(")
+        entry.insert(tk.END, ")")
+    elif text == "x²":
+        entry.insert(0, "(")
+        entry.insert(tk.END, ")^2")
+    elif text == "x^y":
+        entry.insert(0, "(")
+        entry.insert(tk.END, ")^")
+    elif text == "|x|":
+        entry.insert(0, "|")
+        entry.insert(tk.END, "|")
     elif text == "C":
         entry.delete(0, tk.END)
+        label.configure(text="")
     else:
         entry.insert(tk.END, text)
 
@@ -23,7 +38,7 @@ root.resizable(False, False)
 root.configure(bg="#232323")
 
 # Место для хранения формулы
-label = tk.Label(root, text="test", font=("Arial", 24), bg="#232323", fg="#535353", bd=0, justify="right", anchor="e")
+label = tk.Label(root, font=("Arial", 24), bg="#232323", fg="#535353", bd=0, justify="right", anchor="e")
 label.grid(row=0, column=0, columnspan=5, padx=10, pady=(10, 0), sticky="ew")
 # Поле ввода
 entry = tk.Entry(root, font=("Arial", 24), bg="#232323", fg="white", bd=0, justify="right")
@@ -35,7 +50,7 @@ buttons = [
     "sqrt", "7", "8", "9", "×",
     "x^y", "4", "5", "6", "-",
     "log", "1", "2", "3", "+",
-    "ln", "+/-", "0", ".", "="
+    "ln", "|x|", "0", ".", "="
 ]
 
 # Описание функций (символы и мат.операции) и их приоритетов
@@ -43,6 +58,10 @@ operators = {"+": (1, lambda x, y: x + y),
              "-": (1, lambda x, y: x - y),
              "*": (2, lambda x, y: x * y), 
              "/": (2, lambda x, y: x / y)}
+
+math_symbals = "1234567890."
+brackets = "()"
+wrapping_operators = ["log", "ln", "sin", "cos", "tg", "ctg", "sqrt", "rad"]
 
 # Обратная польская нотация
 def polish_notation(expression):
@@ -52,14 +71,14 @@ def polish_notation(expression):
         number = ''
         for symbal in expression:
             # Место, где создается число
-            if symbal in '1234567890.':
+            if symbal in math_symbals:
                 number += symbal
             # Если нечисловое значение, то заканчивается создание номера, происходит сброс
             else:
                 if number:
                     yield float(number)
                     number = ''
-                if symbal in operators or symbal in '()':
+                if symbal in operators or symbal in brackets:
                     yield symbal
         # Вывод числа при его создании
         if number:
@@ -85,7 +104,7 @@ def polish_notation(expression):
             # Если скобка открывается, добавляется к списку элементов
             elif element == "(":
                 elements.append(element)
-            # Вынос числовых значений вне списка    
+            # Вынос числовых значений как есть   
             else:
                 yield element
         while elements:

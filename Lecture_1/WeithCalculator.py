@@ -35,7 +35,7 @@ root.resizable(False, False)
 validate_digit_command = root.register(validate_digit_input)
 
 # Надпись с описанием действий
-disc_message = tk.Label(root,text="Введите свои данные", font=("Arial", 24), bg="#1e1e1e", fg="white", bd=0,anchor="center")
+disc_message = tk.Label(root,text="Введите свои данные", font=("Arial", 24), bg="#1e1e1e", fg="white", bd=0, anchor="center")
 disc_message.pack(pady=40)
 
 # Блок взаимодействия с формой
