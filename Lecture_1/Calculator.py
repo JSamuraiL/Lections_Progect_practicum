@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import math
 
-# Ивенты, происходящие при нажатии на кнопки
+# Ивенты, происходящие при нажатии на разные кнопки
 def on_click(event):
     text = event.widget.cget("text")
     if text == "=":
@@ -38,13 +38,15 @@ root.geometry("400x600")
 root.resizable(False, False)
 root.configure(bg="#232323")
 
-# Место для хранения формулы
+# Место для вывода формулы
 label = tk.Label(root, font=("Arial", 24), bg="#232323", fg="#535353", bd=0, justify="right", anchor="e")
 label.grid(row=0, column=0, columnspan=5, padx=10, pady=(10, 0), sticky="ew")
-# Поле ввода
+
+# Поле ввода формулы
 entry = tk.Entry(root, font=("Arial", 24), bg="#232323", fg="white", bd=0, justify="right")
 entry.grid(row=1, column=0, columnspan=5, padx=10, pady=(0, 10), sticky="ew")
 
+# Массив кнопок
 buttons = [
     "sin", "cos", "tg", "ctg", "rad",
     "(", ")", "x²", "C", "/",
@@ -72,6 +74,7 @@ operators = {"+": (1, lambda x, y: x + y),
              "minus": (4, lambda x: -x)
              }
 
+# Разбиение символов на категории
 math_symbols = "1234567890."
 brackets = "()"
 wrapping_operators = ["log", "ln", "sin", "cos", "tg", "ctg", "sqrt", "rad", "abs"]
@@ -79,23 +82,26 @@ wrapping_operators = ["log", "ln", "sin", "cos", "tg", "ctg", "sqrt", "rad", "ab
 # Обратная польская нотация
 def polish_notation(expression):
 
-    #Парсер, принимает строку и отделяет числа от символов
-    def parser_numbers(expression):
+    # Парсер, разбирает выражение на токены с особыми случаями
+    def parser_tokens(expression):
         number = ''
         letter = 0
-        allow_minus = True 
+        allow_minus = True # Нужно для разрешения отрицательных чисел
         while letter < len(expression):
             symbol = expression[letter]
+            
             # Место, где создается число
             if symbol in math_symbols:
                 number += symbol
                 allow_minus = False
-            # Если нечисловое значение, то заканчивается создание номера, происходит сброс
             else:
+                # Если нечисловое значение, то заканчивается создание номера, происходит сброс;
                 if number:
                     yield float(number)
                     number = ''
-                found_function = False
+                found_function = False # Нужно для поиска функций;
+
+                # Если найденное значение входит в список функций, вносится в массив по правилам;
                 for function in wrapping_operators:
                     if expression.startswith(function, letter):
                         yield function
@@ -103,6 +109,8 @@ def polish_notation(expression):
                         allow_minus = True
                         found_function = True
                         break
+                
+                # Если не входит, то работают следующие правила:
                 if not found_function:
                     if symbol == "-" and allow_minus:
                         yield "minus"
@@ -128,6 +136,7 @@ def polish_notation(expression):
                        operators[element][0] <= operators[elements[-1]][0]):
                     yield elements.pop()
                  elements.append(element)
+
             # Если нашлась закрывающаяся скобка, проходимся по всем элементам в обратном порядке до открывающейся скобки    
             elif element == ")":
                 while elements:
@@ -135,12 +144,15 @@ def polish_notation(expression):
                     if check_bracket == "(":
                         break
                     yield check_bracket
+
             # Если скобка открывается, добавляется к списку элементов
             elif element == "(":
                 elements.append(element)
             # Вынос числовых значений как есть   
             else:
                 yield element
+
+        # Выставление полученной последовательности в обратном порядке
         while elements:
             yield elements.pop()
     
@@ -163,7 +175,7 @@ def polish_notation(expression):
         return elements[0]
     
     # Подсчет по польской нотации
-    return calculation(parser_functions(parser_numbers(expression)))
+    return calculation(parser_functions(parser_tokens(expression)))
     
     
     
@@ -172,9 +184,12 @@ def create_button(text):
     btn = tk.Button(
         root, text=text, font=("Arial", 14), fg="white", width=5, height=2, bd=0, activebackground="#555555", 
         activeforeground="white"
-    )    
+    )
+    # "Особые" кнопки    
     if text == "=":
         btn.configure(bg="#678afc", activebackground="#80B9FF")
+    elif text in "1234567890." or text == "|x|":
+        btn.configure(bg="#535353")
     else:
         btn.configure(bg="#3b3b3b")
     return btn
@@ -182,6 +197,7 @@ def create_button(text):
 row = 2
 col = 0
 
+# Расстановка кнопок
 for button in buttons:
     btn = create_button(button)
     btn.grid(row=row, column=col, padx=2, pady=2, sticky="nsew")
