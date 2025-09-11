@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import math
 
 # Ивенты, происходящие при нажатии на кнопки
 def on_click(event):
@@ -22,8 +23,8 @@ def on_click(event):
         entry.insert(0, "(")
         entry.insert(tk.END, ")^")
     elif text == "|x|":
-        entry.insert(0, "|")
-        entry.insert(tk.END, "|")
+        entry.insert(0, "abs(")
+        entry.insert(tk.END, ")")
     elif text == "C":
         entry.delete(0, tk.END)
         label.configure(text="")
@@ -57,11 +58,23 @@ buttons = [
 operators = {"+": (1, lambda x, y: x + y), 
              "-": (1, lambda x, y: x - y),
              "*": (2, lambda x, y: x * y), 
-             "/": (2, lambda x, y: x / y)}
+             "/": (2, lambda x, y: x / y),
+             "^": (3, lambda x, y: x ** y),
+             "sin": (4, lambda x: math.sin(x)),
+             "cos": (4, lambda x: math.cos(x)),
+             "tg": (4, lambda x: math.tan(x)),
+             "ctg": (4, lambda x: 1/math.tan(x)),
+             "sqrt": (4, lambda x: math.sqrt(x)),
+             "log": (4, lambda x: math.log10(x)),
+             "ln": (4, lambda x: math.log(x)),
+             "rad": (4, lambda x: math.radians(x)),
+             "abs": (4, lambda x: abs(x)),
+             "minus": (4, lambda x: -x)
+             }
 
-math_symbals = "1234567890."
+math_symbols = "1234567890."
 brackets = "()"
-wrapping_operators = ["log", "ln", "sin", "cos", "tg", "ctg", "sqrt", "rad"]
+wrapping_operators = ["log", "ln", "sin", "cos", "tg", "ctg", "sqrt", "rad", "abs"]
 
 # Обратная польская нотация
 def polish_notation(expression):
@@ -69,17 +82,38 @@ def polish_notation(expression):
     #Парсер, принимает строку и отделяет числа от символов
     def parser_numbers(expression):
         number = ''
-        for symbal in expression:
+        letter = 0
+        allow_minus = True 
+        while letter < len(expression):
+            symbol = expression[letter]
             # Место, где создается число
-            if symbal in math_symbals:
-                number += symbal
+            if symbol in math_symbols:
+                number += symbol
+                allow_minus = False
             # Если нечисловое значение, то заканчивается создание номера, происходит сброс
             else:
                 if number:
                     yield float(number)
                     number = ''
-                if symbal in operators or symbal in brackets:
-                    yield symbal
+                found_function = False
+                for function in wrapping_operators:
+                    if expression.startswith(function, letter):
+                        yield function
+                        letter += len(function) - 1
+                        allow_minus = True
+                        found_function = True
+                        break
+                if not found_function:
+                    if symbol == "-" and allow_minus:
+                        yield "minus"
+                        allow_minus = False
+                    elif symbol in operators or symbol in brackets:
+                        yield symbol
+                    if symbol in operators or symbol == "(":
+                        allow_minus = True
+                    else:
+                        allow_minus = False
+            letter += 1
         # Вывод числа при его создании
         if number:
             yield float(number)
@@ -116,8 +150,12 @@ def polish_notation(expression):
         for element in polish_expression:
             # Если операция, то идет ее выполнение по инструкции
             if element in operators:
-                y, x = elements.pop(), elements.pop()
-                elements.append(operators[element][1](x, y))
+                if element in wrapping_operators or element == "minus":
+                    x = elements.pop()
+                    elements.append(operators[element][1](x))
+                else:
+                    y, x = elements.pop(), elements.pop()
+                    elements.append(operators[element][1](x, y))
             # Если число, то идет его фиксация для подсчета
             else:
                 elements.append(element)
