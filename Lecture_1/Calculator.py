@@ -5,6 +5,7 @@ import math
 
 # Ивенты, происходящие при нажатии на разные кнопки
 def on_click(event):
+    entry.configure(state="normal")
     text = event.widget.cget("text")
     if text == "=":
         try:
@@ -12,8 +13,10 @@ def on_click(event):
             result = polish_notation(entry.get().replace("×", "*"))
             entry.delete(0, tk.END)
             entry.insert(tk.END, str(result))
+        except OverflowError:
+            messagebox.showerror("Ошибка", "Слишком большое число")
         except Exception as e:
-            messagebox.showerror(f"Ошибка {e}", "Неверное выражение")
+            messagebox.showerror("Ошибка", f"Ошибка при написании: {e}")
     elif text in wrapping_operators:
         entry.insert(0, text+"(")
         entry.insert(tk.END, ")")
@@ -31,6 +34,7 @@ def on_click(event):
         label.configure(text="")
     else:
         entry.insert(tk.END, text)
+    entry.configure(state="disabled")
 
 
 # Настройка окна
@@ -40,6 +44,7 @@ root.geometry("400x600")
 root.resizable(False, False)
 root.configure(bg="#232323")
 
+
 # Место для вывода формулы
 label = tk.Label(root, font=("Arial", 24), bg="#232323", fg="#535353", bd=0,
                  justify="right", anchor="e")
@@ -47,8 +52,9 @@ label.grid(row=0, column=0, columnspan=5, padx=10, pady=(10, 0), sticky="ew")
 
 # Поле ввода формулы
 entry = tk.Entry(root, font=("Arial", 24), bg="#232323", fg="white", bd=0,
-                 justify="right")
+                 justify="right", state="disabled")
 entry.grid(row=1, column=0, columnspan=5, padx=10, pady=(0, 10), sticky="ew")
+
 
 # Массив кнопок
 buttons = [
@@ -170,12 +176,17 @@ def polish_notation(expression):
                     x = elements.pop()
                     elements.append(operators[element][1](x))
                 else:
+                    # Ошибка при неправильном количестве символов в массиве
+                    if (len(elements) != 2):
+                        raise Exception("Неверное выражение")
                     y, x = elements.pop(), elements.pop()
                     elements.append(operators[element][1](x, y))
             # Если число, то идет его фиксация для подсчета
             else:
                 elements.append(element)
         # Результат подсчета - единственный элемент списка
+        if len(elements) > 1:
+            raise Exception("Неверное выражение")
         return elements[0]
 
     # Подсчет по польской нотации
