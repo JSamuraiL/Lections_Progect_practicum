@@ -2,17 +2,18 @@ import tkinter as tk
 from tkinter import messagebox
 import math
 
+
 # Ивенты, происходящие при нажатии на разные кнопки
 def on_click(event):
     text = event.widget.cget("text")
     if text == "=":
         try:
             label.configure(text=entry.get()+"=")
-            result = polish_notation(entry.get().replace("×","*"))
+            result = polish_notation(entry.get().replace("×", "*"))
             entry.delete(0, tk.END)
             entry.insert(tk.END, str(result))
         except Exception as e:
-            messagebox.showerror("Ошибка", "Неверное выражение")
+            messagebox.showerror(f"Ошибка {e}", "Неверное выражение")
     elif text in wrapping_operators:
         entry.insert(0, text+"(")
         entry.insert(tk.END, ")")
@@ -31,6 +32,7 @@ def on_click(event):
     else:
         entry.insert(tk.END, text)
 
+
 # Настройка окна
 root = tk.Tk()
 root.title("Калькулятор")
@@ -39,11 +41,13 @@ root.resizable(False, False)
 root.configure(bg="#232323")
 
 # Место для вывода формулы
-label = tk.Label(root, font=("Arial", 24), bg="#232323", fg="#535353", bd=0, justify="right", anchor="e")
+label = tk.Label(root, font=("Arial", 24), bg="#232323", fg="#535353", bd=0,
+                 justify="right", anchor="e")
 label.grid(row=0, column=0, columnspan=5, padx=10, pady=(10, 0), sticky="ew")
 
 # Поле ввода формулы
-entry = tk.Entry(root, font=("Arial", 24), bg="#232323", fg="white", bd=0, justify="right")
+entry = tk.Entry(root, font=("Arial", 24), bg="#232323", fg="white", bd=0,
+                 justify="right")
 entry.grid(row=1, column=0, columnspan=5, padx=10, pady=(0, 10), sticky="ew")
 
 # Массив кнопок
@@ -57,9 +61,9 @@ buttons = [
 ]
 
 # Описание функций (символы и мат.операции) и их приоритетов
-operators = {"+": (1, lambda x, y: x + y), 
+operators = {"+": (1, lambda x, y: x + y),
              "-": (1, lambda x, y: x - y),
-             "*": (2, lambda x, y: x * y), 
+             "*": (2, lambda x, y: x * y),
              "/": (2, lambda x, y: x / y),
              "^": (3, lambda x, y: x ** y),
              "sin": (4, lambda x: math.sin(x)),
@@ -77,7 +81,9 @@ operators = {"+": (1, lambda x, y: x + y),
 # Разбиение символов на категории
 math_symbols = "1234567890."
 brackets = "()"
-wrapping_operators = ["log", "ln", "sin", "cos", "tg", "ctg", "sqrt", "rad", "abs"]
+wrapping_operators = ["log", "ln", "sin", "cos", "tg",
+                      "ctg", "sqrt", "rad", "abs"]
+
 
 # Обратная польская нотация
 def polish_notation(expression):
@@ -86,22 +92,21 @@ def polish_notation(expression):
     def parser_tokens(expression):
         number = ''
         letter = 0
-        allow_minus = True # Нужно для разрешения отрицательных чисел
+        allow_minus = True  # Нужно для разрешения отрицательных чисел
         while letter < len(expression):
             symbol = expression[letter]
-            
             # Место, где создается число
             if symbol in math_symbols:
                 number += symbol
                 allow_minus = False
             else:
-                # Если нечисловое значение, то заканчивается создание номера, происходит сброс;
+                # Если нечисловое значение, конец создание номера, сброс;
                 if number:
                     yield float(number)
                     number = ''
-                found_function = False # Нужно для поиска функций;
+                found_function = False  # Нужно для поиска функций;
 
-                # Если найденное значение входит в список функций, вносится в массив по правилам;
+                # Если значение в списке функций, внос в массив по правилам;
                 for function in wrapping_operators:
                     if expression.startswith(function, letter):
                         yield function
@@ -109,7 +114,6 @@ def polish_notation(expression):
                         allow_minus = True
                         found_function = True
                         break
-                
                 # Если не входит, то работают следующие правила:
                 if not found_function:
                     if symbol == "-" and allow_minus:
@@ -132,12 +136,12 @@ def polish_notation(expression):
         for element in parsed_expression:
             # Если выражение вне скобок, добавляем его справа от списка:
             if element in operators:
-                 while (elements and elements[-1] != '(' and 
+                while (elements and elements[-1] != '(' and
                        operators[element][0] <= operators[elements[-1]][0]):
                     yield elements.pop()
-                 elements.append(element)
+                elements.append(element)
 
-            # Если нашлась закрывающаяся скобка, проходимся по всем элементам в обратном порядке до открывающейся скобки    
+            # Если закрывающая скобка, проход по элементам
             elif element == ")":
                 while elements:
                     check_bracket = elements.pop()
@@ -148,14 +152,14 @@ def polish_notation(expression):
             # Если скобка открывается, добавляется к списку элементов
             elif element == "(":
                 elements.append(element)
-            # Вынос числовых значений как есть   
+            # Вынос числовых значений как есть
             else:
                 yield element
 
         # Выставление полученной последовательности в обратном порядке
         while elements:
             yield elements.pop()
-    
+
     # Функция подсчета на основе польской нотации
     def calculation(polish_expression):
         elements = []
@@ -173,19 +177,18 @@ def polish_notation(expression):
                 elements.append(element)
         # Результат подсчета - единственный элемент списка
         return elements[0]
-    
+
     # Подсчет по польской нотации
     return calculation(parser_functions(parser_tokens(expression)))
-    
-    
-    
+
+
 # Создание кнопки
 def create_button(text):
     btn = tk.Button(
-        root, text=text, font=("Arial", 14), fg="white", width=5, height=2, bd=0, activebackground="#555555", 
-        activeforeground="white"
+        root, text=text, font=("Arial", 14), fg="white", width=5, height=2,
+        bd=0, activebackground="#555555", activeforeground="white"
     )
-    # "Особые" кнопки    
+    # "Особые" кнопки
     if text == "=":
         btn.configure(bg="#678afc", activebackground="#80B9FF")
     elif text in "1234567890." or text == "|x|":
@@ -193,6 +196,7 @@ def create_button(text):
     else:
         btn.configure(bg="#3b3b3b")
     return btn
+
 
 row = 2
 col = 0
