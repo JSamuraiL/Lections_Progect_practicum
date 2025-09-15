@@ -15,7 +15,7 @@ def validate_digit_input(new_value):
 
 # Создание формы
 root = tk.Tk()
-root.title("Задание 3")
+root.title("Задание 8")
 root.geometry("350x350")
 root.resizable(False, False)
 root.configure(bg="#232323")

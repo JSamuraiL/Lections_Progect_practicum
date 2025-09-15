@@ -2,7 +2,7 @@ import tkinter as tk
 
 # Создание формы
 root = tk.Tk()
-root.title("Задание 3")
+root.title("Задание 4")
 root.geometry("400x450")
 root.resizable(False, False)
 root.configure(bg="#232323")
